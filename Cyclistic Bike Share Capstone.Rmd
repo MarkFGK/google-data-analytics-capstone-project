@@ -1,0 +1,338 @@
+---
+title: "Clistic Bike Sharing Capstone"
+output: html_notebook
+---
+# CYCLISTIC BIKE-SHARE CAPSTONE PROJECT
+
+## Introduction
+
+This case study is a part of the Google Data Analytics capstone, in which real-world tasks of a data analyst at the fictional company 'Cyclistic' will be performed. In order to address various business tasks, the steps of the data analysis process "Ask', 'Prepare', 'Process', 'Analyze', 'Share', and 'Act' will be executed through this capstone project.
+
+### Company Background
+
+In 2016, Cyclistic launched a successful bike-share offering. Since then, the program has grown to a fleet of 5,824 bicycles that are geotracked and locked into a network of 692 stations across Chicago. The bikes can be unlocked from one station and returned to any other station in the system anytime.
+
+Until now, Cyclistic’s marketing strategy relied on building general awareness and appealing to broad consumer segments. One approach that helped make these things possible was the flexibility of its pricing plans: single-ride passes, full-day passes, and annual memberships. Customers who purchase single-ride or full-day passes are referred to as casual riders. Customers who purchase annual memberships are Cyclistic members.
+
+Cyclistic’s finance analysts have concluded that annual members are much more profitable than casual riders. Although the pricing flexibility helps Cyclistic attract more customers, the director of marketing believes that maximizing the number of annual members will be key to future growth. Rather than creating a marketing campaign that targets all-new customers, she believes there is a very good chance to convert casual riders into members. She notes that casual riders are already aware of the Cyclistic program and have chosen Cyclistic for their mobility needs.
+
+The director of marketing has set a clear goal: Design marketing strategies aimed at converting casual riders into annual members. In order to do that, however, the marketing analyst team needs to better understand how annual members and casual riders differ, why casual riders would buy a membership, and how digital media could affect their marketing tactics. The marketing team are interested in analyzing the Cyclistic historical bike trip data to identify trends.
+
+### Scenario
+
+As a Junior Data Analyst on the marketing analyst team at Cyclistic, the marketing director believes the company’s future success depends on maximizing the number of annual memberships. Therefore, the team aims to understand how casual riders and annual members use Cyclistic bikes differently. These insights will guide the team in designing a new marketing strategy to convert casual riders into annual members. However, before implementation, Cyclistic executives must approve the recommendations. Hence, these recommendations need to be substantiated with compelling data insights and professional data visualizations.
+
+
+## ASK
+
+**Business Task**
+Design marketing strategy to convert casual riders to members
+
+**Guide Questions**
+* How do annual members and casual riders use Cyclistic bikes differently?
+* Why would casual riders buy Cyclistic annual memberships?
+* How can Cyclistic use digital media to influence casual riders to become members?
+
+
+## PREPARE
+
+**Data Source:** [divvy-trip-data](https://divvy-tripdata.s3.amazonaws.com/index.html)
+
+**Date Accessed:** August 22, 2023
+
+**Data used:**
+* 202208-divvy-tripdata
+* 202209-divvy-tripdata
+* 202210-divvy-tripdata
+* 202211-divvy-tripdata
+* 202212-divvy-tripdata
+* 202301-divvy-tripdata
+* 202302-divvy-tripdata
+* 202303-divvy-tripdata
+* 202304-divvy-tripdata
+* 202305-divvy-tripdata
+* 202306-divvy-tripdata
+* 202307-divvy-tripdata
+
+There are 12 files with naming convention of “YYYYMM-divvy-tripdata” and each file includes information for one month, such as:
+* ride_id
+* rideable_type
+* started_at
+* ended_at
+* start_station_name
+* start_station_id
+* end_station_name
+* end_station_id
+* start_lat
+* start_lng
+* end_lat
+* end_lng and
+* member_casual.
+
+This is public data that can be used to explore how different customer types are using Cyclistic bikes. But note that data-privacy issues prohibit from using riders’ personally identifiable information. This means that we won’t be able to connect pass purchases to credit card numbers to determine if casual riders live in the Cyclistic service area or if they have purchased multiple single passes.
+
+**Limitations:** No information on gender, age or type of use (leisure, go to work, etc.).
+
+
+## PROCESS
+
+Due to Microsoft Excel limitation that can only handle up to 1,048,576 rows, I prefer using BigQuery for data cleaning, considering the size of Cyclistic data sets when combined.
+Data Cleaning.
+
+1. **Combining of data**:
+To start the data cleaning process, I ensure consistency in the column headers across the 12 files mentioned earlier. Following this, I combine the data from these 12 files, covering a year's dataset, which provides insights into the behavioral patterns of Cyclistic bike customers.
+
+2. **Checking and deleting rows with null values:**
+|     Column Name       | Nul Values |
+|-----------------------|--- --------|
+| ride_id1              | 0          |
+| rideable_type	        | 0          |
+| started_at            | 0          |
+| ended_at              | 0          |
+| start_station_name    | 868772     |
+| start_station_id      | 868904     |
+| end_station_name      | 925008     |
+| end_station_id        | 925149     |
+| start_lat             | 0          |
+| start_lng             | 0          |
+| end_lat               | 6102       |
+| end_lng               | 6102       |
+| member_casual         | 0          |
+|-----------------------|------------|
+
+**Note:** there were rows that has two or more null values. All in all, I deleted 1,383,239 rows.
+
+3. **Duplicate value verification:**
+Conduct an assessment to check that there was no repeated trip ID in the ride_id column. As a result, there were no duplicate values found.
+
+4. **Calculating ride durations and remove trips with abnormalities:**
+I added a new column called "ride_duration" to calculate the duration of each trip. After that, I removed rows with abnormalities, like trips lasting more than a day, rides where the end time was before the start time, and trips lasting less than a minute. In total, I deleted 53,268 rows.
+
+5. **Choosing Columns to Keep:**
+"start_station_id" and "end_station_id" columns were omitted due to their non-contributory role in the analysis. On the other hand, the remaining columns were retained. Notably, "start_lat", "start_lng", "end_lat", and "end_lng" columns were also retained despite not being used in the analysis, this consideration derives their potential usage for generating map visualization purposes.
+
+6. **Understanding When Rides Happen:**
+To establish a well-defined analytical scope, I extracted the day of the week, month, and hour information from the 'started_at' column. This process enables a precise analysis of the timing for each ride.
+
+After undergoing a series of data cleaning and processing steps, the initial dataset comprising 5,723,606 rows narrowed down to 4,287,099 rows, which approximately 75% of the original data. The resultant dataset includes essential column headers such as ride_id, rideable_type, started_at, ended_at, start_station_name, end_station_name, start_lat, start_lng, end_lat, end_lng, member_casual, ride_duration, day, month, and hour are all set for detailed analysis and sharing endeavors.
+
+[Click here to review Google Big Query commands use for data processing and data cleaning](https://drive.google.com/file/d/1G6g23OiRzixj-XGGaSVVBf9ahU3uLT7U/view?usp=sharing)
+
+
+## Analyze and Visualize
+
+**Data manipulation:** Google BigQuery
+
+**Data Visualization:** R
+```{r}
+install.packages(c("dplyr", "ggplot2", "lubridate"))
+
+# Load the libraries
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+
+# Set the working directory to the folder where your CSV is located
+setwd("C:/Users/Mark K/Documents/After Data Cleaning")
+
+# Load the data
+data <- read.csv("tripdata_combined.csv")
+```
+
+The data is stored appropriately and is now prepared for analysis. I use R to make rules and conditions on creating visualizations that shows patterns and insights within the data.
+
+### Comparison within Members and Casual Users
+
+```{r}
+# Create a pie chart for member vs casual distribution
+pie_data <- data %>%
+  group_by(member_casual) %>%
+  summarise(count = n())
+
+# Calculate percentage
+total_count <- sum(pie_data$count)
+pie_data$percentage <- (pie_data$count / total_count) * 100
+
+# Create the pie chart with labels inside and no legend
+library(ggplot2)
+ggplot(pie_data, aes(x = 1, y = percentage, fill = member_casual)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  geom_text(aes(label = paste0(member_casual, "\n", count, "\n", round(percentage, 1), "%")),
+            position = position_stack(vjust = 0.5),
+            size = 4,
+            fill = "white") +  # Set text fill to white to hide labels' fill color
+  labs(title = "Member vs Casual") +
+  theme_void() +
+  theme(legend.position = "none")  # Remove the legend
+```
+
+The pie chart clearly shows that Cyclistic bike sharing has a higher number of member users than casual users. However, the focus of this analysis is to encourage more casual users to become members. Given that 37.2% of users are categorized as casual, this represents a substantial opportunity for converting them into member users.
+
+Before we continue, let's take a look at how different rideable types are used by member and casual users.
+
+### Member vs. Casual User
+
+```{r}
+# Create bar chart showing rideable types and how users use bikes
+summary_data <- data %>%
+  group_by(rideable_type, member_casual) %>%
+  summarise(count = n()) %>%
+  arrange(rideable_type, member_casual)
+
+# Create the comparison bar chart with wider bars and labels inside
+ggplot(summary_data, aes(x = reorder(rideable_type, -count), y = count, fill = member_casual)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 1), width = 0.8) +  # Adjust width
+  geom_text(aes(label = count), position = position_dodge(width = 1), vjust = -0.3, size = 3) +  # Place labels inside and adjust vjust and size
+  labs(title = "Rideable Types",  # Set title
+       x = NULL,       # Remove x-axis label
+       y = NULL,       # Remove y-axis label
+       fill = "User Type") +  # Restore legend title
+  scale_y_continuous(breaks = NULL) +  # Remove Y-axis labels
+  theme_minimal() +
+  theme(axis.title.y = element_blank(),  # Remove Y-axis label
+        axis.text.x = element_text(angle = 0, hjust = 0.5),  # Straighten x-axis labels and center them
+        axis.ticks.y = element_blank(),   # Remove Y-axis ticks
+        legend.position = "right",         # Place legend at the right side
+        legend.title = element_blank(),    # Remove legend title
+        legend.spacing.y = unit(0.2, "cm"),
+        legend.text = element_text(size = 8, hjust = 0.5),  # Adjust legend label size and position
+        plot.margin = margin(50, 100, 20, 20),  # Adjust plot margin
+        plot.background = element_blank(),  # Remove plot background
+        panel.grid.major.x = element_blank(),  # Remove vertical grid lines
+        panel.grid.minor.x = element_blank())  # Remove vertical minor grid lines
+```
+
+The analysis of rideable types among Cyclistic's member and casual users highlights trends. Classic and electronic bikes are popular, while the preference for docked bikes among casual users suggests potential for targeted marketing strategies to attract more members.
+
+```{r}
+# Calculate the average trip duration per user type
+avg_duration <- data %>%
+  group_by(member_casual) %>%
+  summarise(avg_duration = mean(ride_duration))
+
+# Create the horizontal column chart
+ggplot(avg_duration, aes(y = member_casual, x = avg_duration, fill = member_casual)) +
+  geom_col() +
+  labs(title = "Average Trip Duration by User Type",
+       y = NULL,
+       x = NULL) +
+  theme_minimal() +
+  theme(legend.position = "none")  # Remove legend
+
+```
+
+
+Casual users exhibit longer ride durations on average than members, highlighting an opportunity to engage users with extended rides. This offers a chance to provide tailored incentives, potentially leading them to consider switching to more suitable membership plans.
+
+### When Trips Happen
+
+```{r}
+# Create the summary data frame
+yearly_trip_summary <- data %>%
+  group_by(month, member_casual) %>%
+  summarise(trips = n())  # Count the number of rows for each combination
+
+# Create the line chart with annual trip behavior
+ggplot(yearly_trip_summary, aes(x = month, y = trips, color = member_casual, group = member_casual)) +
+  geom_line(size = 1.5) +  # Increase line thickness
+  labs(title = "Annual Trip Summary",
+       x = NULL,  # Remove x-axis label
+       y = NULL) +  # Remove y-axis label
+  theme_minimal() +
+  scale_x_discrete(limits = month.name) +  # Set X-axis to show all months in order
+  theme(legend.position = c(0.1, 0.9),    # Place the legend at the top left
+        legend.title = element_blank(),   # Remove legend title
+        legend.direction = "vertical",    # Vertical legend
+        legend.key = element_blank(),     # Remove legend key
+        legend.box.background = element_blank(),  # Remove legend background
+        axis.text.x = element_text(angle = 45, hjust = 1),  # Slant x-axis labels
+        panel.grid.major = element_blank(),  # Remove major grid lines
+        panel.grid.minor = element_blank(),  # Remove minor grid lines
+        axis.line = element_line(colour = "black"),  # Add black axis lines
+        axis.text.y = element_text(vjust = 0.5),   # Center Y-axis labels
+        legend.margin = margin(t = 0, r = 0, b = 0, l = 0)) +  # Adjust legend margin
+  scale_y_continuous(labels = scales::comma_format(scale = 1, suffix = ""),  # Format Y-axis labels without suffix
+                     breaks = seq(0, 300000, 100000),  # Set custom breaks
+                     limits = c(0, 400000),  # Adjust Y-axis limits
+                     expand = expansion(add = c(0, 0.02)))  # Adjust Y-axis expansion
+```
+
+The annual trip summary highlights the months of May through September as the prime periods of user participation, showing a notable increase compared to months such as January, February, November, and December. This seasonal variation presents an excellent opportunity for Cyclistic to strategically engage users during the quieter months by offering incentives, promotions, or special events that encourage bike usage. Encouraging users during quieter months can help Cyclistic promote year-round bike-sharing and maintain consistent engagement.
+
+```{r}
+# Calculate the total trips per day for each user type
+daily_trip_counts <- data %>%
+  group_by(day, member_casual) %>%
+  summarise(total_trips = n())
+
+# Create the line chart
+ggplot(daily_trip_counts, aes(x = day, y = total_trips, color = member_casual, group = member_casual)) +
+  geom_line(size = 1.5) +
+  labs(title = "Daily Trip Trend",
+       x = NULL,    # Remove x-axis label
+       y = NULL,    # Remove y-axis label
+       color = NULL) +
+  scale_y_continuous(limits = c(0, 600000), breaks = c(0, 200000, 400000, 600000), labels = scales::comma) +  # Set Y-axis breaks and labels
+  scale_x_discrete(limits = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")) +  # Set x-axis order
+  theme_minimal() +
+  theme(legend.position = "top",          # Place legend at the top
+        legend.justification = "left",   # Position it at the left of the chart area
+        legend.title = NULL,
+        panel.grid = element_blank(),
+        axis.title.x = element_blank(),   # Remove x-axis label
+        axis.title.y = element_blank(),   # Remove y-axis label
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 10),  # Slant x-axis labels
+        axis.text.y = element_text(size = 10))
+```
+
+Exploring the weekly trip trends, a distinct pattern emerges: members tend to utilize the bike-sharing service more frequently on weekdays, while casual users show heightened activity during weekends. This trend aligns with the idea that casual users often opt for biking during leisure time, explaining the surge in weekend activity. This presents a strategic opportunity for Cyclistic to extend membership invitations to casual users, with a specific focus on highlighting the benefits they can reap during weekends.
+
+```{r}
+# Calculate the total trips per hour for each user type
+hourly_trip_counts <- data %>%
+  group_by(hour, member_casual) %>%
+  summarise(total_trips = n())
+
+# Create the line chart for houly trend
+ggplot(hourly_trip_counts, aes(x = hour, y = total_trips, color = member_casual, group = member_casual)) +
+  geom_line(size = 1.5) +
+  labs(title = "Hourly Trip Trend",
+       x = "Hour of the Day",
+       y = NULL,                  # Remove y-axis label
+       color = NULL) +
+  scale_x_continuous(breaks = c(1, 4, 7, 10, 13, 16, 19, 22),
+                     labels = c("1-3", "4-6", "7-9", "10-12", "13-15", "16-18", "19-21", "22-0")) +  # Set x-axis breaks and labels
+  scale_y_continuous(labels = scales::comma_format()) +  # Format y-axis labels as whole numbers
+  theme_minimal() +
+  theme(legend.position = "top",            # Place legend at the top
+        legend.justification = "left",     # Position it at the left of the chart area
+        legend.title = NULL,
+        panel.grid = element_blank(),
+        axis.title.x = element_text(size = 10),
+        axis.title.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10))
+```
+
+The hourly trend analysis reveals distinct patterns for both member and casual users. Members show heightened activity during the morning rush hours (6-9 AM) and the late afternoon (4-6 PM), with sustained usage between 10 AM and 3 PM. In contrast, casual users exhibit a steady increase from 8 AM to 6 PM, though their peaks remain below those of members. This insightful data allows Cyclistic to strategically target promotions, emphasizing peak hours for members and potentially enticing casual users to become members themselves.
+
+In summary, Cyclistic has the potential to turn casual users into annual members by smartly catering to their preferences and habits. Our analysis provides valuable insights into rideable choices, ride lengths, monthly involvement, and hourly activity patterns for both types of users. By customizing offers to match peak hours and calmer periods, Cyclistic can boost interaction, encourage year-round bike-sharing, and inspire casual users to enjoy the perks of membership.
+
+
+## ACT
+
+After thorough analysis, Cyclistic is primed to develop strategic marketing plans that persuade casual riders to transition into valued members. My upcoming suggestions will provide a clear roadmap for this conversion process.
+
+1. **Weekend Rider Membership:**
+Introduce the "Weekend Explorer" plan, designed to casual riders with discounted weekend rides, exclusive route access, and priority bike availability, enticing them to become members and enjoy ongoing benefits.
+
+2. **Off-Peak Adventure Challenge:**
+Engage both members and casual users with the "Off-Peak Adventure" challenge, offering enticing rewards such as bonus ride credits, exclusive merchandise, and contest entries. This motivates casual users to think about becoming annual members, because they'll get extra rewards and benefits when they register as annual member.
+
+3. **Happy Hour Rewards:**
+Utilize digital media to attract casual riders during peak hours, highlighting membership advantages like extended ride times, lower rates in high-demand periods, and exclusive biking event invites, encouraging their transition to loyal members.
+
+
+## SUMMARRY
+In this capstone project, we've examined Cyclistic's bike-sharing data to create targeted strategies for turning casual riders into annual members. Through insightful analysis, we've uncovered trends and preferences that shape our actionable recommendations. Our proposed approaches include a "Weekend Explorer" plan, an "Off-Peak Adventure" challenge, and "Happy Hour Rewards," all aimed at boosting engagement and converting more riders into valued annual members, thereby ensuring Cyclistic's continued growth.
