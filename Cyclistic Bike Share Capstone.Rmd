@@ -1,5 +1,5 @@
 ---
-title: "Clistic Bike Sharing Capstone"
+title: "Cyclistic Bike Sharing Capstone"
 output: html_notebook
 ---
 # CYCLISTIC BIKE-SHARE CAPSTONE PROJECT
